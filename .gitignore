@@ -210,4 +210,9 @@ __marimo__/
 
 # Pour éviter d'avoir des pb de droits d'auteur
 *.epub
-translate_LOTM.sh
+*.sh
+!translate.sh 
+images/covers/
+trad/
+*.md 
+!README.md

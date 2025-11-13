@@ -16,18 +16,35 @@ Pour les curieux, voici le trailer de l'animé :
 </p>
 
 ## Fonctionnement
-J'ai donc développé une solution qui exploite l'API de ChatGPT d'OpenAI pour effectuer la traduction de l'anglais vers le français de manière automatique.  
+J'ai donc développé une solution qui exploite l'API de ChatGPT d'OpenAI pour effectuer la traduction de l'anglais vers le français de manière automatique (et relativement qualitative par rapport à d'autres modèles disponibles sur Hugging Face).  
 La solution prend en entrée un ebook au format .epub et ressort un ebook au format .epub également.  
 Ceci afin de rendre l'objet fini lisible par l'application "Livres" native sur iPhone.  
 
+### Modèle de base 
 La pipeline s'articule ainsi : 
 - le livre en .epub est transformé en .md 
-- on spécifie lesquels de ces chapitres on veut traduire
-- on envoie chaque chapitre non traduit 1 par 1 accompagné d'un prompt au modèle GPT. 
+- on spécifie quels chapitres on veut traduire
+- on envoie chaque chapitre non traduit accompagnés d'un prompt au modèle 
 - on récupère la réponse traduite qu'on stocke 
 - ... on itère jusqu'a traduire tous les chapitres voulus ...
-- on prend tous les chapitres traduis qu'on assemble selon un style en css défini et on retransforme le tout en .epub  
+- on prend tous les chapitres traduis qu'on assemble selon un style défini et on retransforme le tout en .epub  
 ![schema](/images/schema/schema.png)
+
+### Traduction séquentielle Vs parallèlisée
+Pour éviter un traitement séquentiel — c’est-à-dire la traduction d’un chapitre après l’autre — et donc un temps de traduction total qui aurait cette forme :   
+ 
+On peut donc généraliser notre temps de traduction unitaire en :  
+$$
+\text{Temps total} = \text{nombre de chapitres} \times \text{temps par chapitre}
+$$
+*Supposons qu'un appel API pour une traduction d'un chapitre prenne ≃ 1.5 minute.*   
+Pour 10 chapitres on passe déjà 15 minutes de temps de traduction.  
+
+Là où, en parallèlisant, on peut diviser ce temps de calcul et obtenir un temps total de traduction qui prend cette forme : 
+$$
+\text{Temps total} = \frac{\text{nombre de chapitres} \times \text{temps par chapitre}}{\text{nombre de workers}}
+$$
+Il est donc bien plus efficace de paralléliser les traductions - c'est-à-dire travailler en même temps plutôt qu'un après l'autre.  
 
 ## Contenu du projet 
 ```text
@@ -38,9 +55,13 @@ gpt_ebook_translator/
 │   └── covers/                 #Dossier pour stocker les couvertures d'ebooks (optionnel mais c'est vraiment joli)
 ├── .gitignore                  #Fichiers à ignorer par Git
 ├── README.md                   #Ce document
-├── epub.css                    #Pour la mise en forme de l'ebook de sortie
-├── functions.py                #Fonctions principales
-├── main.py                     #Script principal
+├── translation_scripts/        #Dossier qui contient les scripts python de traduction
+    ├── base_trad.py            #Script qui construit le squelette de la traduction par appel API
+    ├── batch_trad.py           #Script qui parallèlise la traduction et veille a ne pas dépaser le quota d'appel API
+    └── main.py                 #Script d'orchestration de la traduction
+├── postprocessing              #Dossier relatif à la mise en forme de l'output final
+    ├── epub.css                #Contient les styles de mise en forme de l'output
+    └── mise_en_forme.py        #Script de mise en forme final pour un output aux petits oignons
 ├── requirements.txt            #Pour répliquer l'env
 └── translate.sh                #Script shell pour lancer l’ensemble de la pipeline
 ```
@@ -55,7 +76,7 @@ Pour ce faire voici la démarche :
 - cliquer sur **“Create new secret key”** pour générer une nouvelle clé (en haut à droite)
 - copier la clé créée (gardez-la au chaud pour la partie suivante où je vous explique comment l'utiliser)
 - recharger le compte de quelques dollars pour pouvoir requêter l'API sur ce [portail](https://platform.openai.com/settings/organization/billing/overview)
-  >  *À titre indicatif, un volume de* **Lord of the Mysteries** *d’environ 200 chapitres m’a coûté un peu moins de 7 $ à traduire.*
+  >  *À titre indicatif, un volume de* **Lord of the Mysteries** *d’environ 200 chapitres m’a coûté un peu moins de 6 $ à traduire.*
 
 
 ## Réutilisation

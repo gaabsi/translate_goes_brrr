@@ -3,14 +3,15 @@ import sys
 
 import openai
 
-from functions import BookTranslator
+from scripts.base_trad import BookTranslator
+from scripts.batch_trad import BatchTranslator
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 EPUB_ORIGINAL = sys.argv[1]
-EPUB_SORTIE = sys.argv[2]
-FROM = int(sys.argv[3])
-TO = int(sys.argv[4])
+FROM = int(sys.argv[2])
+TO = int(sys.argv[3])
 CSS_PATH = os.path.join(os.path.dirname(__file__), "epub.css")
+MD_SAVE_PATH = os.path.expanduser(f"~/gpt_ebook_translator/trad/md/{sys.argv[4]}.md")
 
 
 PROMPT = """
@@ -25,12 +26,12 @@ PROMPT = """
  Make sure that you don't repeat yourself in your translations.
  """
 
+bt = BookTranslator(prompt=PROMPT, model="gpt-4o")
+manager = BatchTranslator(bt, max_tpm=60000)
 
-translator = BookTranslator(prompt=PROMPT, css_path=CSS_PATH)
-
-translator.translate_epub_to_translated_epub(
-    input_epub_path=EPUB_ORIGINAL,
-    output_epub_path=EPUB_SORTIE,
-    chapter_start=FROM,
-    chapter_end=TO,
+manager.translate_epub_range(
+    input_epub=EPUB_ORIGINAL,
+    output_md=MD_SAVE_PATH,
+    start_chap=FROM,
+    end_chap=TO,
 )

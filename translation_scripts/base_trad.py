@@ -21,6 +21,10 @@ class BookTranslator:
         self.client = OpenAI()
 
     def extract_epub_to_markdown(self, epub_path, output_md_path):
+        """
+        Prend un livre au format epub (lisible sur l'application livres).
+        Retourne le même livre mais en markdown.
+        """
         markdown_content = []
         book = epub.read_epub(epub_path)
 
@@ -51,6 +55,11 @@ class BookTranslator:
             f.write("\n".join(markdown_content))
 
     def extract_chapter_by_index(self, md_path, chapter_number, level=2):
+        """
+        Prend un fichier markdown (un livre dans notre cas) et extrait un chapitre en particulier.
+        Selon la mise en page du markdown en question le niveau peut changer.
+        Ici on avait des titres de niveau 2 (##).
+        """
         with open(md_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
@@ -75,6 +84,10 @@ class BookTranslator:
         return "".join(content)
 
     def translate_chapter(self, text):
+        """
+        Prend du texte en entrée, un prompt additionnel.
+        Envoie la requête ainsi composée via appel API.
+        """
         response = self.client.chat.completions.create(
             model=self.model,
             temperature=0,
@@ -84,59 +97,5 @@ class BookTranslator:
             ],
         )
         traduction = response.choices[0].message.content
-        traduction_no_rep = re.sub(r"(\b[^.!?]+[.!?])(\s+\1)+", r"\1", traduction)
-        return traduction_no_rep
 
-    def translate_epub_to_translated_epub(
-        self, input_epub_path, output_epub_path, chapter_start, chapter_end, level=2
-    ):
-        temp_md = self.temp_md_path
-        self.extract_epub_to_markdown(input_epub_path, temp_md)
-
-        all_translations = []
-        for chap_num in range(chapter_start, chapter_end + 1):
-            try:
-                chap = self.extract_chapter_by_index(temp_md, chap_num, level)
-            except Exception as e:
-                print(e)
-                continue
-
-            try:
-                translated = self.translate_chapter(chap)
-                translated = f"\n\n\\newpage\n\n{translated.strip()}\n"
-                all_translations.append(translated)
-            except Exception as e:
-                print(e)
-                continue
-
-            time.sleep(self.delay)
-
-        final_md = temp_md.replace(".md", "_translated.md")
-        with open(final_md, "w", encoding="utf-8") as f:
-            f.write("\n\n".join(all_translations))
-
-        try:
-            convert_args = [
-                "--standalone",
-                "--toc",
-            ]
-            if self.css_path:
-                convert_args.append(f"--css={self.css_path}")
-
-            pypandoc.convert_file(
-                final_md,
-                to="epub",
-                format="markdown",
-                outputfile=output_epub_path,
-                extra_args=convert_args,
-            )
-            print(f"EPUB écrit : {os.path.abspath(output_epub_path)}")
-
-        except Exception as e:
-            print(e)
-
-        finally:
-            if os.path.exists(temp_md):
-                os.remove(temp_md)
-            if os.path.exists(final_md):
-                os.remove(final_md)
+        return traduction
