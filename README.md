@@ -56,12 +56,12 @@ gpt_ebook_translator/
 ├── .gitignore                  #Fichiers à ignorer par Git
 ├── README.md                   #Ce document
 ├── translation_scripts/        #Dossier qui contient les scripts python de traduction
-    ├── base_trad.py            #Script qui construit le squelette de la traduction par appel API
-    ├── batch_trad.py           #Script qui parallèlise la traduction et veille a ne pas dépaser le quota d'appel API
-    └── main.py                 #Script d'orchestration de la traduction
+│   ├── base_trad.py            #Script qui construit le squelette de la traduction par appel API
+│   ├── batch_trad.py           #Script qui parallèlise la traduction et veille a ne pas dépaser le quota d'appel API
+│   └── main.py                 #Script d'orchestration de la traduction
 ├── postprocessing              #Dossier relatif à la mise en forme de l'output final
-    ├── epub.css                #Contient les styles de mise en forme de l'output
-    └── mise_en_forme.py        #Script de mise en forme final pour un output aux petits oignons
+│   ├── epub.css                #Contient les styles de mise en forme de l'output
+│   └── mise_en_forme.py        #Script de mise en forme final pour un output aux petits oignons
 ├── requirements.txt            #Pour répliquer l'env
 └── translate.sh                #Script shell pour lancer l’ensemble de la pipeline
 ```
