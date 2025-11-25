@@ -94,24 +94,27 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Ajouter au shell votre clé API et donnez lui les droits d'execution : 
+On crée la clé API pour faire les traductions :   
+Pour rappel : [portail API](https://platform.openai.com/account/api-keys) > **“Create new secret key”**  
+On copie la clé obtenue et on éxecute ceci (crée un fichier texte "api_key.txt" et y met le contenu du presse-papier) : 
 ```bash
-code translate.sh #Changez la variable OPENAI_API_KEY et remplacez la par votre clé et sauvegardez le fichier
-chmod +x translate.sh
+touch api_key.txt
+pbpaste > api_key.txt #Get-Clipboard // wl-paste 
 ```
 
-Pour traduire un ebook pour pourrez ainsi procéder de la manière suivante : 
+On crée un fichier texte pour donner le contexte à notre traduction (c'est un texte qui sera envoyé en meme temps que notre chapitre à traduire) : 
 ```bash 
-./translate.sh {Chemin du .epub à traduire} {Chemin du .epub traduit} {Chapitre début trad} {Chapitre fin trad}
-#Exemple de traduction du tome Undying de LOTM (chap 733 à 946)
-./translate.sh LOTM_original.epub Undying.epub 733 946
+touch context_prompt.txt
+code context_prompt.txt
 ```
 
-Bonus : ajouter une couverture au livre créé : 
-```bash
-#Déplacer l'image dans le dossier images/covers/
-mv {Chemin de votre image} {gpt_ebook_translator/images/covers/[votre_image.png]}
-ebook-meta {Chemin du .epub traduit} --cover={gpt_ebook_translator/images/covers/[votre_image.png]}
+Une fois toutes ces configurations prêtes on peut ouvrir le translate.sh qui est le fichier qui orchestre la traduction : 
+```bash 
+code translate.sh 
+#On change toutes les variables relatives à la traduction
+#Une fois les variables changées 
+chmod +x translate.sh 
+./translate.sh 
 ```
 
 Bonne lecture ! 
