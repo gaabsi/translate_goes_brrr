@@ -11,14 +11,16 @@ from openai import OpenAI
 
 class BookTranslator:
     def __init__(
-        self, prompt, model="gpt-4o", css_path=None, temp_md_path=None, delay=2
+        self, prompt, model="gpt-4o", css_path=None, temp_md_path=None, delay=2, api_key=None
     ):
         self.prompt = prompt
         self.model = model
         self.css_path = css_path
         self.temp_md_path = temp_md_path or os.path.join(os.getcwd(), "temp.md")
         self.delay = delay
-        self.client = OpenAI()
+        self.client = None 
+        if api_key is not None:
+            self.client = OpenAI(api_key=api_key)
 
     def extract_epub_to_markdown(self, epub_path, output_md_path):
         """

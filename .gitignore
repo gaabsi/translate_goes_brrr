@@ -208,6 +208,9 @@ marimo/_lsp/
 __marimo__/
 
 
+# Pour éviter de payer pour vos traductions 
+api_key.txt 
+
 # Pour éviter d'avoir des pb de droits d'auteur
 *.epub
 *.sh
@@ -216,3 +219,6 @@ images/covers/
 trad/
 *.md 
 !README.md
+app/
+*.mp3
+*.txt
