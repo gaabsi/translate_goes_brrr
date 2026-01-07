@@ -3,16 +3,16 @@ import sys
 
 import openai
 
-from scripts.base_trad import BookTranslator
-from scripts.batch_trad import BatchTranslator
+from base_trad import BookTranslator
+from batch_trad import BatchTranslator
 
 API_KEY = os.getenv("OPENAI_API_KEY")
-PROMPT = os.getenv('PROMPT')
+PROMPT = os.getenv("PROMPT")
 EPUB_ORIGINAL = sys.argv[1]
 FROM = int(sys.argv[2])
 TO = int(sys.argv[3])
 CSS_PATH = os.path.join(os.path.dirname(__file__), "epub.css")
-MD_SAVE_PATH = os.path.expanduser(f"~/gpt_ebook_translator/trad/md/{sys.argv[4]}.md")
+MD_SAVE_PATH = os.path.expanduser(f"~/translate_goes_brrr/trad/md/{sys.argv[4]}.md")
 
 
 bt = BookTranslator(prompt=PROMPT, model="gpt-4o", api_key=API_KEY)

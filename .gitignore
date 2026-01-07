@@ -216,7 +216,8 @@ api_key.txt
 *.sh
 !translate.sh 
 images/covers/
-trad/
+trad/epub/*.epub
+trad/md/*.md
 *.md 
 !README.md
 app/

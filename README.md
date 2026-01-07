@@ -1,4 +1,4 @@
-# gpt_ebook_translator
+# translation_goes_brrr
 
 ## Contexte
 Ce projet a été inspiré par ma récente découverte d'un webnovel chinois.  
@@ -48,22 +48,23 @@ Il est donc bien plus efficace de paralléliser les traductions - c'est-à-dire 
 
 ## Contenu du projet 
 ```text
-gpt_ebook_translator/ 
+translation_goes_brrr/ 
+├── README.md  
 ├── images/
 │   ├── schema/
-│   │   └── schema_glo.png      #Schéma expliquant la pipeline complète
-│   └── covers/                 #Dossier pour stocker les couvertures d'ebooks (optionnel mais c'est vraiment joli)
-├── .gitignore                  #Fichiers à ignorer par Git
-├── README.md                   #Ce document
-├── translation_scripts/        #Dossier qui contient les scripts python de traduction
-│   ├── base_trad.py            #Script qui construit le squelette de la traduction par appel API
-│   ├── batch_trad.py           #Script qui parallèlise la traduction et veille a ne pas dépaser le quota d'appel API
-│   └── main.py                 #Script d'orchestration de la traduction
-├── postprocessing              #Dossier relatif à la mise en forme de l'output final
-│   ├── epub.css                #Contient les styles de mise en forme de l'output
-│   └── mise_en_forme.py        #Script de mise en forme final pour un output aux petits oignons
-├── requirements.txt            #Pour répliquer l'env
-└── translate.sh                #Script shell pour lancer l’ensemble de la pipeline
+│   │   └── schema_glo.png      # Schéma expliquant la pipeline complète
+│   └── covers/                 # Dossier pour stocker les couvertures d'ebooks (optionnel mais c'est vraiment joli)
+├── .gitignore                  
+├── .dockerignore                  
+├── Dockerfile                  # Dockerfile du projet             
+├── src/                        # Dossier qui contient les scripts de traduction
+│   ├── base_trad.py            # cript qui construit le squelette de la traduction par appel API
+│   ├── batch_trad.py           # Script qui parallèlise la traduction et veille a ne pas dépaser le quota d'appel API
+│   ├── epub.css                # Contient les styles de mise en forme de l'output
+│   ├── mise_en_forme.py        # Script de mise en forme final pour un output aux petits oignons
+│   └── main.py                 # Script d'orchestration de la traduction
+├── requirements.txt            # Packages du projet
+└── translate.sh                # Script shell pour lancer l’ensemble de la pipeline
 ```
 
 Il n'y a malheureusement aucun fichier d'input ou d'output dans ce repo afin de respecter les droits d'auteur.  
@@ -84,37 +85,41 @@ Pour ce faire voici la démarche :
 Afin de pouvoir traduire aussi **LOTM** ou tout autre ebook au format .epub.  
 Sur le terminal de votre machine physique : 
 
-Copiez le projet dans votre machine et préparer le venv pour le projet  : 
+Copiez le projet dans votre machine  : 
 ```bash 
 cd ~
-git clone https://github.com/gaabsi/gpt_ebook_translator.git
-cd gpt_ebook_translator 
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+git clone https://github.com/gaabsi/translation_goes_brrr.git
 ```
 
 On crée la clé API pour faire les traductions :   
 Pour rappel : [portail API](https://platform.openai.com/account/api-keys) > **“Create new secret key”**  
-On copie la clé obtenue et on éxecute ceci (crée un fichier texte "api_key.txt" et y met le contenu du presse-papier) : 
+On copie la clé obtenue et on la colle dans un fichier qu'on appellera api_key.txt : 
 ```bash
 touch api_key.txt
-pbpaste > api_key.txt #Get-Clipboard // wl-paste 
+code api_key.txt 
 ```
+(On oublie pas de sauvegarder ! sinon après faut pas chouiner si ça marche pas mdrr)
 
 On crée un fichier texte pour donner le contexte à notre traduction (c'est un texte qui sera envoyé en meme temps que notre chapitre à traduire) : 
 ```bash 
 touch context_prompt.txt
 code context_prompt.txt
 ```
+(Pareil on sauvegarde, sinon on envoie juste un chapitre sans rien de plus)
 
-Une fois toutes ces configurations prêtes on peut ouvrir le translate.sh qui est le fichier qui orchestre la traduction : 
+Dernières choses à changer les trucs propres à la traduction donc on modifie 
 ```bash 
-code translate.sh 
-#On change toutes les variables relatives à la traduction
-#Une fois les variables changées 
-chmod +x translate.sh 
-./translate.sh 
+code translate.sh
+# Hop hop hop on change les chemins (et on sauvegarde !)
+```
+
+
+
+Une fois toutes ces configurations prêtes, on peut créer notre image Docker et tout lancer : 
+```bash 
+cd ~/translate_goes_brrr
+docker buildx build --platform linux/amd64,linux/arm64 -t translate_goes_brrr:latest . 
+docker run --rm -v ~/translate_goes_brrr:/app translate_goes_brrr:latest
 ```
 
 Bonne lecture ! 

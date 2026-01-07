@@ -1,0 +1,7 @@
+venv/
+app/
+trad/
+.gitignore
+.git
+chap*
+*.md

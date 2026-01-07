@@ -1,24 +1,27 @@
 import os
-import re
-import time
 
 import ebooklib
-import pypandoc
 from bs4 import BeautifulSoup, NavigableString, Tag
 from ebooklib import epub
 from openai import OpenAI
 
 
 class BookTranslator:
-    def __init__(
-        self, prompt, model="gpt-4o", css_path=None, temp_md_path=None, delay=2, api_key=None
-    ):
+    """
+    Classe crée afin de faire la traduction.
+
+    Parametres :
+    - prompt (str) : c'est le contexte prompt, on explique ce qu'on veut (ex : français -> anglais, le contexte, ...)
+    - model (str) : Par défaut "gpt-4o" car pas trop gourmand en ressources et de bonnes performances en traduction.
+    - css_path (str) : Chemin du .css où on met en forme notre output.
+    - api_key (str) : clé api.
+    """
+
+    def __init__(self, prompt, model="gpt-4o", css_path=None, api_key=None):
         self.prompt = prompt
         self.model = model
         self.css_path = css_path
-        self.temp_md_path = temp_md_path or os.path.join(os.getcwd(), "temp.md")
-        self.delay = delay
-        self.client = None 
+        self.client = None
         if api_key is not None:
             self.client = OpenAI(api_key=api_key)
 
@@ -26,7 +29,15 @@ class BookTranslator:
         """
         Prend un livre au format epub (lisible sur l'application livres).
         Retourne le même livre mais en markdown.
+
+        Parametres :
+        - epub_path (str) : chemin du epub qu'on prend en entrée
+        - output_md_path (str) : chemin du md qu'on écrit en sortie
+
+        Output :
+        Ne renvoie rien, on écrit un fichier sous un autre format.
         """
+
         markdown_content = []
         book = epub.read_epub(epub_path)
 
@@ -53,6 +64,8 @@ class BookTranslator:
                                 text += str(child)
                         markdown_content.append(text.strip() + "\n")
 
+        os.makedirs(os.path.dirname(output_md_path), exist_ok = True)
+
         with open(output_md_path, "w", encoding="utf-8") as f:
             f.write("\n".join(markdown_content))
 
@@ -61,7 +74,16 @@ class BookTranslator:
         Prend un fichier markdown (un livre dans notre cas) et extrait un chapitre en particulier.
         Selon la mise en page du markdown en question le niveau peut changer.
         Ici on avait des titres de niveau 2 (##).
+
+        Parametres :
+        - md_path (str) : chemin du .md qui contient nos chapitres a extraire.
+        - chapter_number (int) : numéro du chapitre qu'on veut extraire.
+        - level (int) : niveau auquel se trouvent les titres de chapitre ici c'était en ##.
+
+        Output :
+        Renvoie le contenu (str) du chapitre.
         """
+
         with open(md_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
@@ -89,7 +111,12 @@ class BookTranslator:
         """
         Prend du texte en entrée, un prompt additionnel.
         Envoie la requête ainsi composée via appel API.
+        Unitaire, une requete a la fois, sous optimal tel quel.
+
+        Parametre :
+        - texte (str) : texte qu'on veut traduire.
         """
+
         response = self.client.chat.completions.create(
             model=self.model,
             temperature=0,

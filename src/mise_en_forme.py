@@ -1,5 +1,4 @@
 import os
-import subprocess
 import sys
 
 import pypandoc
@@ -16,15 +15,13 @@ convert_args = [
     f"--css={CSS_PATH}",
 ]
 
+if os.path.exists(COVER):
+    convert_args.append(f"--epub-cover-image={COVER}")
+
 pypandoc.convert_file(
-    os.path.expanduser(f"~/gpt_ebook_translator/trad/md/{TITLE}.md"),
+    os.path.expanduser(f"~/translate_goes_brrr/trad/md/{TITLE}.md"),
     to="epub",
     format="markdown",
     outputfile=OUTPUT_FILE,
     extra_args=convert_args,
-)
-
-subprocess.run(
-    f"ebook-meta '{OUTPUT_FILE}' --cover={COVER}",
-    shell=True,
 )
